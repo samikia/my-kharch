@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, PieChart } from 'lucide-react'
-
+import { supabase } from '../app/lib/supabase'
 export default function Sidebar() {
   const pathname = usePathname()
 
@@ -15,6 +15,20 @@ export default function Sidebar() {
   return (
     <div className="w-64 bg-gray-800 min-h-screen p-6 border-l border-gray-700">
       <h1 className="text-2xl font-bold mb-10 text-center">حسابداری من</h1>
+      <div className="flex items-center gap-4 mb-8">
+  <a href="/profile" className="bg-gray-700 hover:bg-gray-600 px-5 py-3 rounded-xl transition">
+    پروفایل من
+  </a>
+  <button
+    onClick={async () => {
+      await supabase.auth.signOut()
+      window.location.href = '/auth'
+    }}
+    className="bg-red-600 hover:bg-red-700 px-5 py-3 rounded-xl transition"
+  >
+    خروج
+  </button>
+</div>
       <nav className="space-y-3">
         {links.map((link) => {
           const Icon = link.icon

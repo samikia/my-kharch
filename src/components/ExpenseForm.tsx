@@ -29,7 +29,11 @@ export default function ExpenseForm({ onAdd }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!amount || !description || !date) return
-
+const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    alert('لطفاً وارد حساب خودت شو')
+    return
+  }
     const formattedDate = date.toISOString().split('T')[0]
 
     const { error } = await supabase.from('transactions').insert({
@@ -38,6 +42,7 @@ export default function ExpenseForm({ onAdd }: Props) {
       type,
       category_id: categoryId ? parseInt(categoryId) : null,
       date: formattedDate,
+      user_id:user.id,
     })
 
     if (!error) {
