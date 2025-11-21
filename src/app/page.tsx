@@ -1,65 +1,168 @@
-import Image from "next/image";
+// 'use client'
+
+// import { supabase } from './lib/supabase'
+// import { useEffect, useState } from 'react'
+
+// export default function Home() {
+//   const [expenses, setExpenses] = useState<any[]>([])
+//   const [amount, setAmount] = useState('')
+//   const [description, setDescription] = useState('')
+//   const [category, setCategory] = useState('')
+//   const [type, setType] = useState('expense')
+
+//   useEffect(() => {
+//     fetchExpenses()
+//   }, [])
+
+//   async function fetchExpenses() {
+//     const { data } = await supabase
+//       .from('transactions')
+//       .select('*, categories(name), sources(name)')
+//       .order('date', { ascending: false })
+//     setExpenses(data || [])
+//   }
+
+// async function addExpense(e: React.FormEvent) {
+//   e.preventDefault()
+//   if (!amount || !description) return
+
+//   const { error } = await supabase.from('transactions').insert({
+//     amount: parseFloat(amount),
+//     description,
+//     type,                         // این خط رو حتماً داشته باشه
+//     date: new Date().toISOString().split('T')[0]
+//   })
+
+//   if (error) {
+//     console.error(error)
+//     alert('خطا: ' + error.message)
+//   } else {
+//     setAmount('')
+//     setDescription('')
+//     setCategory('')
+//     fetchExpenses()
+//   }
+// }
+//   return (
+//     <div className="min-h-screen bg-gray-900 text-white p-6">
+//       <div className="max-w-4xl mx-auto">
+//         <h1 className="text-4xl font-bold mb-10 text-center">حسابداری شخصی من</h1>
+
+//         {/* فرم */}
+//         <form onSubmit={addExpense} className="bg-gray-800 shadow--2xl rounded-2xl p-8 mb-10 border border-gray-700">
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//             <input
+//               type="number"
+//               placeholder="مبلغ (تومان)"
+//               value={amount}
+//               onChange={e => setAmount(e.target.value)}
+//               className="bg-gray-700 border border-gray-600 text-white placeholder-gray-400 p-4 rounded-xl text-lg focus:outline-none focus:border-blue-500 transition"
+//               required
+//             />
+//             <input
+//               type="text"
+//               placeholder="توضیح (مثلاً خرید نون)"
+//               value={description}
+//               onChange={e => setDescription(e.target.value)}
+//               className="bg-gray-700 border border-gray-600 text-white placeholder-gray-400 p-4 rounded-xl text-lg focus:outline-none focus:border-blue-500 transition"
+//               required
+//             />
+//             <select 
+//               value={type} 
+//               onChange={e => setType(e.target.value)}
+//               className="bg-gray-700 border border-gray-600 text-white p-4 rounded-xl text-lg focus:outline-none focus:border-blue-500"
+//             >
+//               <option value="expense" className="bg-gray-700">هزینه</option>
+//               <option value="income" className="bg-gray-700">درآمد</option>
+//             </select>
+//             <input
+//               type="text"
+//               placeholder="دسته‌بندی (مثلاً خانه، خوراک)"
+//               value={category}
+//               onChange={e => setCategory(e.target.value)}
+//               className="bg-gray-700 border border-gray-600 text-white placeholder-gray-400 p-4 rounded-xl text-lg focus:outline-none focus:border-blue-500 transition"
+//             />
+//           </div>
+
+//           <button type="submit" className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-xl transition shadow-lg">
+//             ثبت کن
+//           </button>
+//           <div className="text-yellow-400 text-sm mt-2">اگر خطایی بود اینجا نشون میده</div>
+//         </form>
+
+//         {/* لیست هزینه‌ها */}
+//         <div className="space-y-4">
+//           {expenses.length === 0 ? (
+//             <p className="text-center text-gray-400 text-xl">هنوز هیچ هزینه‌ای ثبت نکردی</p>
+//           ) : (
+//             expenses.map(exp => (
+//               <div 
+//                 key={exp.id} 
+//                 className={`p-6 rounded-2xl shadow-xl border ${
+//                   exp.type === 'income' 
+//                     ? 'bg-emerald-900/50 border-emerald-700' 
+//                     : 'bg-red-900/50 border-red-700'
+//                 }`}
+//               >
+//                 <div className="flex justify-between items-center">
+//                   <div>
+//                     <strong className="text-2xl">{exp.description}</strong>
+//                     {exp.categories && 
+//                       <span className="mr-3 text-gray-300 text-lg"> — {exp.categories.name}</span>
+//                     }
+//                   </div>
+//                   <div className={`text-2xl font-bold ${
+//                     exp.type === 'income' ? 'text-emerald-400' : 'text-red-400'
+//                   }`}>
+//                     {exp.type === 'income' ? '+' : '-'} {exp.amount.toLocaleString()} تومان
+//                   </div>
+//                 </div>
+//                 <div className="text-gray-400 mt-2">
+//                   {new Date(exp.date).toLocaleDateString('fa-IR')}
+//                 </div>
+//               </div>
+//             ))
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+'use client'
+
+import { supabase } from './lib/supabase'
+import { useEffect, useState } from 'react'
+import ExpenseForm from '../components/ExpenseForm'
+import ExpenseList from '../components/ExpenseList'
 
 export default function Home() {
+  const [transactions, setTransactions] = useState<any[]>([])
+
+  async function loadTransactions() {
+    const { data } = await supabase
+      .from('transactions')
+      .select('*, categories(name)')
+      .order('date', { ascending: false })
+    setTransactions(data || [])
+  }
+
+  useEffect(() => {
+    loadTransactions()
+  }, [])
+
+  async function handleDelete(id: number) {
+    if (!confirm('مطمئنی؟')) return
+    await supabase.from('transactions').delete().eq('id', id)
+    loadTransactions()
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-10 text-center">حسابداری شخصی من</h1>
+        <ExpenseForm onAdd={loadTransactions} />
+        <ExpenseList transactions={transactions} onDelete={handleDelete} onUpdate={loadTransactions} />
+      </div>
     </div>
-  );
+  )
 }
