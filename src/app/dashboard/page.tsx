@@ -11,17 +11,34 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    async function loadData() {
-      const { data } = await supabase
-        .from('transactions')
-        .select('*, categories(name)')
-        .order('date', { ascending: false })
-      setTransactions(data || [])
-      setLoading(false)
+useEffect(() => {
+  async function loadData() {
+    // اول کاربر رو بگیر
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      // اگه کاربر نیست، می‌فرستیمش به لاگین
+      window.location.href = '/auth'
+      return
     }
-    loadData()
-  }, [])
+
+    // فقط داده‌های همین کاربر رو بگیر
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*, categories(name)')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false })
+
+    if (error) {
+      console.error('خطا در لود داده‌ها:', error)
+      return
+    }
+
+    setTransactions(data || [])
+    setLoading(false)
+  }
+
+  loadData()
+}, [])
 
   const totalIncome = transactions
     .filter(t => t.type === 'income')

@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, PieChart, DollarSign } from 'lucide-react'  // آیکون جدید اضافه شد
+import { Home, PieChart, DollarSign, Rabbit } from 'lucide-react'  // آیکون جدید اضافه شد
 import { supabase } from '../app/lib/supabase'
+import { run } from 'node:test'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -12,6 +13,7 @@ export default function Sidebar() {
     { name: 'خانه', href: '/', icon: Home },
     { name: 'داشبورد و نمودار', href: '/dashboard', icon: PieChart },
     { name: 'سرمایه‌گذاری‌ها', href: '/investments', icon: DollarSign }, // آیکون اضافه شد
+  {name:"اضافه کردن سریع",href:"/quick-add",icon: Rabbit }
     // اگه بعداً بخوای یکی دیگه اضافه کنی هم حتماً icon داشته باشه
   ]
 

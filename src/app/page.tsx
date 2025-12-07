@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import ExpenseForm from '@/components/ExpenseForm'
 import ExpenseList from '@/components/ExpenseList'
 import { redirect } from 'next/navigation'
-
+import RequireAuth from '../components/RequireAuth'
 export default function Home() {
   const [transactions, setTransactions] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
@@ -66,6 +66,7 @@ export default function Home() {
   }
 
   return (
+    <RequireAuth>
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-10 text-center">حسابداری شخصی من</h1>
@@ -78,5 +79,6 @@ export default function Home() {
         />
       </div>
     </div>
+    </RequireAuth>
   )
 }
